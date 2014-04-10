@@ -115,7 +115,6 @@
         }
 
         this.imagesOffScreen  = [];
-        this.viewportHeight   = doc.documentElement.clientHeight;
         this.selector         = opts.selector || '.delayed-image-load';
         this.className        = opts.className || 'image-replace';
         this.gif              = doc.createElement('img');
@@ -220,10 +219,12 @@
 
     Imager.prototype.changeDivsToEmptyImages = function(){
         var self = this;
+        var viewportYDelta = document.documentElement.clientHeight + Imager.getPageOffset();
 
+        // determine the callback on init time to be even faster and avoid the "if"
         applyEach(this.divs, function(element, i){
             if (self.lazyload) {
-                if (self.isThisElementOnScreen(element)) {
+                if (Imager.inViewport(element, viewportYDelta)) {
                     self.divs[i] = self.createGif(element);
                 } else {
                     self.imagesOffScreen.push(element);
@@ -238,10 +239,17 @@
         }
     };
 
-    Imager.prototype.isThisElementOnScreen = function (element) {
+    /**
+     * Checks if an element is contained in the viewport
+     *
+     * @static
+     * @param {HTMLElement}element
+     * @param {Number} viewportYDelta Generally corresponds to the viewport height + its vertical offset.
+     * @returns {boolean}
+     */
+    Imager.inViewport = function (element, viewportYDelta) {
         // document.body.scrollTop was working in Chrome but didn't work on Firefox, so had to resort to window.pageYOffset
         // but can't fallback to document.body.scrollTop as that doesn't work in IE with a doctype (?) so have to use document.documentElement.scrollTop
-        var offset = Imager.getPageOffset();
         var elementOffsetTop = 0;
 
         if (element.offsetParent) {
@@ -251,7 +259,7 @@
             while (element = element.offsetParent);
         }
 
-        return (elementOffsetTop < (this.viewportHeight + offset)) ? true : false;
+        return (elementOffsetTop < viewportYDelta);
     };
 
     Imager.prototype.checkImagesNeedReplacing = function (images) {
