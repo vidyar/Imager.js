@@ -27,6 +27,18 @@
       return value;
     }
 
+    function debounce (fn, delay) {
+      var intervalId;
+
+      return function debouncedFunction(){
+        if (intervalId) {
+          clearTimeout(intervalId);
+        }
+
+        intervalId = setTimeout(fn, delay);
+      };
+    }
+
     getNaturalWidth = (function(){
         if (Object.prototype.hasOwnProperty.call(document.createElement('img'), 'naturalWidth')) {
             return function (image){ return image.naturalWidth;};
@@ -124,7 +136,6 @@
         this.scrollDelay      = opts.scrollDelay || 250;
         this.onResize         = opts.hasOwnProperty('onResize') ? opts.onResize : true;
         this.lazyload         = opts.hasOwnProperty('lazyload') ? opts.lazyload : false;
-        this.scrolled         = false;
         this.availablePixelRatios = opts.availablePixelRatios || [1, 2];
         this.availableWidths  = opts.availableWidths || defaultWidths;
         this.onImagesReplaced = opts.onImagesReplaced || function () {};
@@ -166,19 +177,6 @@
             self.init();
         });
     }
-
-    Imager.prototype.scrollCheck = function(){
-        if (this.scrolled) {
-            if (!this.imagesOffScreen.length) {
-                window.clearInterval(this.interval);
-            }
-
-            this.divs = this.imagesOffScreen.slice(0); // copy by value, don't copy by reference
-            this.imagesOffScreen.length = 0;
-            this.changeDivsToEmptyImages();
-            this.scrolled = false;
-        }
-    };
 
     Imager.prototype.init = function(){
         this.initialized = true;
@@ -387,15 +385,8 @@
     Imager.prototype.registerScrollEvent = function (){
         var self = this;
 
-        this.scrolled = false;
-
-        this.interval = window.setInterval(function(){
-            self.scrollCheck();
-        }, self.scrollDelay);
-
-        addEvent(window, 'scroll', function(){
-            self.scrolled = true;
-        });
+        addEvent(window, 'scroll', debounce(function(){ self.changeDivsToEmptyImages(); }, self.scrollDelay));
+        addEvent(window, 'resize', debounce(function(){ self.changeDivsToEmptyImages(); }, self.scrollDelay));
     };
 
     Imager.getPageOffsetGenerator = function getPageVerticalOffset(testCase){
