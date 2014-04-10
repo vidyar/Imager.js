@@ -27,11 +27,13 @@
 
         <script src="../../Imager.js"></script>
         <script>
+          function startImager(){
             new Imager({
-                lazyload: true,
-                scrollDelay: 2000, // We'll set this quite high so we get a chance to see the lazy loading happening
-                availableWidths: [320, 640, 1024]
+              lazyload: true,
+              scrollDelay: 1000, // We'll set this quite high so we get a chance to see the lazy loading happening
+              availableWidths: [320, 640, 1024]
             });
+          }
         </script>
     </body>
 </html>
