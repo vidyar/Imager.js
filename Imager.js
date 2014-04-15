@@ -130,8 +130,8 @@
         this.availableWidths  = opts.availableWidths || defaultWidths;
         this.onImagesReplaced = opts.onImagesReplaced || function () {};
         this.widthsMap        = {};
-        this.refreshPixelRatio();
         this.widthInterpolator = opts.widthInterpolator || returnDirectValue;
+        this.refreshPixelRatio();
 
         // Needed as IE8 adds a default `width`/`height` attribute…
         this.gif.removeAttribute('height');
@@ -139,7 +139,7 @@
 
         if (typeof this.availableWidths !== 'function'){
           if (typeof this.availableWidths.length === 'number') {
-            this.widthsMap = Imager.createWidthsMap(this.availableWidths, this.widthInterpolator);
+            this.widthsMap = Imager.createWidthsMap(this.availableWidths, this.widthInterpolator, this.devicePixelRatio);
           }
           else {
             this.widthsMap = this.availableWidths;
@@ -315,12 +315,12 @@
         return (context || window)['devicePixelRatio'] || 1;
     };
 
-    Imager.createWidthsMap = function createWidthsMap (widths, interpolator) {
+    Imager.createWidthsMap = function createWidthsMap (widths, interpolator, pixelRatio) {
         var map = {},
             i   = widths.length;
 
         while (i--) {
-            map[widths[i]] = interpolator(widths[i], this.devicePixelRatio);
+            map[widths[i]] = interpolator(widths[i], pixelRatio);
         }
 
         return map;
