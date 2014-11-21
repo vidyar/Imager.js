@@ -15,3 +15,5 @@ script:
   - npm run test-pre
   - 'if [[ $TRAVIS_PULL_REQUEST == ''false'' ]]; then { npm run test-remote; }; else { npm run test-local; }; fi'
   - firefox --version
+
+build_image: shippable/minv2
